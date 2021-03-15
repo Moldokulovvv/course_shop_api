@@ -1,0 +1,8 @@
+Django==3.1
+psycopg2-binary==2.8.5
+Pillow==7.1
+python-decouple
+djangorestframework==3.11
+drf-yasg
+celery
+redis
