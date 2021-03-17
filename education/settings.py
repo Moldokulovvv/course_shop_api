@@ -43,10 +43,14 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'rest_framework.authtoken',
+    'oauth2_provider',
+    'social_django',
+    'rest_framework_social_oauth2',
     'drf_yasg',
 
     #myapps
     'account',
+    'order',
     'main',
     'likes',
     'cart',
@@ -153,9 +157,20 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework_social_oauth2.authentication.SocialAuthentication',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 2
 }
+
+SOCIAL_AUTH_VK_OAUTH2_KEY = '7793249'
+SOCIAL_AUTH_VK_OAUTH2_SECRET = 'HPlByoBTjq8uLMuoNmGL'
+
+AUTHENTICATION_BACKEND = (
+    'social_core.backends.vk.VKOAuth2',
+    'rest_framework_social_oauth2.backends.DjangoOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 CELERY_BROKER_URL = 'redis://localhost:6380'

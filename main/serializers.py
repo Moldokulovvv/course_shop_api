@@ -27,7 +27,7 @@ class CourseImageSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['image'] = self._get_image_url(instance)
-        print(representation)
+
         return representation
 
 
@@ -45,15 +45,35 @@ class CourseSerializer(serializers.ModelSerializer):
         user = self.context.get('request').user
         return likes_services.is_fan(obj, user)
 
+    def get_fields(self):
+        action = self.context.get('action')
+        fields = super().get_fields()
+
+
+        if action == 'list':
+
+            fields.pop('images')
+        return fields
+
     def to_representation(self, instance):
+        action = self.context.get('action')
+        fields = super().get_fields()
         representation = super().to_representation(instance)
         representation['comments'] = CommentSerializer(instance.comments.all(), many=True, context=self.context).data
         representation['author'] = instance.author.email
         representation['category'] = CategorySerializer(instance.category).data
+
         representation['images'] = CourseImageSerializer(instance.images.all(), many=True, context=self.context).data
+        if action == 'retrieve':
+            recomendation = Course.objects.filter(title__icontains=instance.title)
+            recomendation_ = []
+            for rec in recomendation:
+                recomendation_.append(rec.title)
+            representation['recomendation'] = f"{recomendation_}"
         return representation
 
     def create(self, validated_data):
+        print(validated_data)
         request = self.context.get('request')
         user_id = request.user.id
         images_data = request.FILES

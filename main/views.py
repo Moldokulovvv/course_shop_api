@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 from rest_framework import generics, viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated, IsAdminUser
 from likes.mixins import LikedMixin
 from .permissions import IsCourseAuthor
 from django.db.models import Q
@@ -24,17 +24,27 @@ class CategoryListView(generics.ListAPIView):
 class CourseViewSet(LikedMixin,viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    # permission_classes = (IsAuthenticatedOrReadOnly, )
+    permission_classes = (IsAdminUser, )
 
     def get_serializer_context(self):
-        return {'request': self.request}
+        return {'request': self.request, 'action':self.action}
 
     def get_permissions(self):
-        if self.action in ['update', 'partial_update', 'destroy']:
-            permissions = [IsCourseAuthor, ]
+        if self.action in ['list', 'retrieve', 'search']:
+            permissions = [AllowAny, ]
+
+        elif self.action in ['like', 'unlike', 'fans']:
+            permissions = [IsAuthenticated, ]
         else:
-            permissions = []
+            permissions = [IsAdminUser, ]
         return [permission() for permission in permissions]
+
+    # def get_permissions(self):
+    #     if self.action in ['update', 'partial_update', 'destroy']:
+    #         permissions = [IsCourseAuthor, ]
+    #     else:
+    #         permissions = []
+    #     return [permission() for permission in permissions]
 
     @action(detail=False, methods=['get'])
     def my_courses(self, request):

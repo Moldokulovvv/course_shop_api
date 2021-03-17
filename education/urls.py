@@ -46,6 +46,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('v1/api/docs/', schema_view.with_ui()),
     path('admin/', admin.site.urls),
+    path('auth/', include('rest_framework_social_oauth2.urls')),
     path('api-auth/', include('rest_framework.urls')),
     path('v1/api/categories', CategoryListView.as_view()),
     path('v1/api/add-image/', CourseImageView.as_view()),
@@ -53,3 +54,5 @@ urlpatterns = [
     path('v1/api/', include(router.urls)),
 
 ] + static (settings.MEDIA_URL,document_root=settings.MEDIA_ROOT)
+
+#https://login.vk.com/?act=openapi&oauth=1&aid=7793249%location=127.0.0.1&new=1&response_type=code

@@ -44,8 +44,6 @@ class MyUser(AbstractUser):
         return self.email
 
     def create_activation_code(self):
-
-
         import hashlib
         string = self.email + str(self.id)
         encode_string = string.encode()
