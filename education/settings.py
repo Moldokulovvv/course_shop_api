@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     #myapps
     'account',
     'order',
+    'favorite',
     'main',
     'likes',
     'cart',

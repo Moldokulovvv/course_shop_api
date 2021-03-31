@@ -7,7 +7,7 @@ from likes.serializers import FanSerializer
 
 
 class LikedMixin:
-    @action(detail=True,methods=['POST'])
+    @action(detail=True, methods=['POST'])
     def like(self, request, pk=None):
         obj = self.get_object()
         print(obj)

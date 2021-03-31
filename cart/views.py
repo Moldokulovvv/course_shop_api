@@ -18,7 +18,9 @@ class CartViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         queryset = queryset.filter(customer=request.user)
+        print(queryset)
         serializer = CartSerializer(queryset, many=True, context={'request': request})
+
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def get_serializer_context(self):
@@ -40,9 +42,6 @@ class CartViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
 
 
-
-
-
     def get_permissions(self):
         if self.action in ['update', 'partial_update', 'destroy', 'list']:
             permissions = [IsCartAuthor, ]
@@ -55,10 +54,5 @@ class CartViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=['POST'])
-    def buy(self, request, pk=None):
-        b = request.user.cart
-        print(b)
-        order = Order.objects.create(email=request.user, address=b['course'])
-        return Response('1233213123')
+
 

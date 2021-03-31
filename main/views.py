@@ -4,14 +4,36 @@ from django.utils import timezone
 from rest_framework import generics, viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated, IsAdminUser
+
+from favorite.mixins import FavoriteMixin
 from likes.mixins import LikedMixin
-from .permissions import IsCourseAuthor
+
 from django.db.models import Q
 from django.shortcuts import render
 from rest_framework.decorators import api_view, action
 
 from main.models import Category, Course, CourseImage, Comment
+from main.permissions import IsAuthorPermission
 from main.serializers import CategorySerializer, CourseSerializer, CourseImageSerializer, CommentSerializer
+
+
+class PermissionMixin:
+
+    def get_permissions(self):
+        #create,list,retrieve,update, partial_update, delete
+        if self.action == 'create':
+            permission = [IsAuthenticated,]
+        elif self.action in ['update', 'partial_update', 'delete']:
+            permission = [IsAuthorPermission, ]
+        else:
+            permission = []
+        return [perm() for perm in permission]
+
+    def get_serializer_context(self):
+        return {'request': self.request, 'action' : self.action}
+
+
+
 
 
 class CategoryListView(generics.ListAPIView):
@@ -21,7 +43,7 @@ class CategoryListView(generics.ListAPIView):
 
 
 
-class CourseViewSet(LikedMixin,viewsets.ModelViewSet):
+class CourseViewSet(LikedMixin,FavoriteMixin ,viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     permission_classes = (IsAdminUser, )
@@ -33,7 +55,7 @@ class CourseViewSet(LikedMixin,viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve', 'search']:
             permissions = [AllowAny, ]
 
-        elif self.action in ['like', 'unlike', 'fans']:
+        elif self.action in ['like', 'unlike', 'fans', 'favourite', 'favourites']:
             permissions = [IsAuthenticated, ]
         else:
             permissions = [IsAdminUser, ]
@@ -55,9 +77,11 @@ class CourseViewSet(LikedMixin,viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        weeks_count = int(self.request.query_params.get('day', 0))
+
+        weeks_count = int(self.request.query_params.get('hours', 0))
+
         if weeks_count > 0:
-            start_date = timezone.now() - timedelta(days=weeks_count)
+            start_date = timezone.now() - timedelta(hours=weeks_count)
             queryset = queryset.filter(created_at__gte=start_date)
         return queryset
 
@@ -67,8 +91,8 @@ class CourseViewSet(LikedMixin,viewsets.ModelViewSet):
 
         q = request.query_params.get('q')        #request.query_params = request.GET
         queryset = self.get_queryset() #->Post.objects.all()
-        queryset = queryset.filter(Q(title__icontains=q) |
-                                   Q(text__icontains=q))
+        print('213123123123dddddddddddddddddddddddd')
+        queryset = queryset.filter(Q(title__icontains=q) | Q(text__icontains=q))
         serializer = CourseSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -87,9 +111,10 @@ class CourseImageView(generics.ListCreateAPIView):
     def get_serializer_context(self):
         return {'request': self.request}
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(PermissionMixin, viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
+
 
     def get_serializer_context(self):
         return {'request': self.request}

@@ -21,21 +21,32 @@ class CartSerializer(serializers.ModelSerializer):
         #     print('123')
         validated_data['customer_id'] = customer_id
         b = request.data
-        print(b.get('course'))
+        # print(b.get('course'))
         course = Course.objects.get(id=int(b.get('course')))
 
         user = MyUser.objects.get(id=request.user.id)
 
+
         if not Order.objects.filter(email=request.user.id):
-            Order.objects.create(email=request.user, address='stop')
 
-        r = Order.objects.get(email=request.user.id)
-        r.city += f",{course.title}"
-        r.save()
-        print(r.city)
+            m = Order.objects.create(email=request.user, address='stop')
+            m.save()
+            r = Order.objects.get(email=request.user.id)
+            print(type(r.id))
 
-        cart = Cart.objects.create(**validated_data)
-        return cart
+            validated_data['order_id'] = r.id
+
+            cart = Cart.objects.create(**validated_data)
+
+            return cart
+        else:
+            r = Order.objects.get(email=request.user.id)
+            r.city += "111."
+            r.save()
+            print(r.id)
+
+            cart = Cart.objects.create(order_id=r.id, **validated_data)
+            return cart
 
 
 

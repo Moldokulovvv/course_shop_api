@@ -17,3 +17,20 @@ def send_activation_code(email, activation_code):
         [email, ],
         fail_silently=False
     )
+
+
+
+@shared_task
+def send_activation_codee(email, activation_code):
+    activation_url = f'{activation_code}'
+    message = f"""
+        
+        Your code: {activation_url}
+"""
+    send_mail(
+        'Forgot Password',
+        message,
+        'test@test.com',
+        [email, ],
+        fail_silently=False
+    )

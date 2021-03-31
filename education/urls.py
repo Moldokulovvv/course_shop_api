@@ -25,11 +25,13 @@ from rest_framework.routers import DefaultRouter
 
 from cart.views import CartViewSet
 from main.views import CategoryListView, CourseViewSet, CourseImageView, CommentViewSet
+from order.views import OrderViewSet
 
 router = DefaultRouter()
 router.register('courses', CourseViewSet)
 router.register('comments', CommentViewSet)
 router.register('cart', CartViewSet)
+router.register('order', OrderViewSet)
 
 schema_view = get_schema_view(
     openapi.Info(

@@ -78,9 +78,11 @@ class CourseSerializer(serializers.ModelSerializer):
         user_id = request.user.id
         images_data = request.FILES
 
+
         validated_data['author_id'] = user_id
         course = Course.objects.create(**validated_data)
-        for image in images_data.getlist('images'):
+        for image in images_data.getlist('image'):
+
             CourseImage.objects.create(course=course, image=image)
         return course
 
